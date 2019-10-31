@@ -1,10 +1,13 @@
-FROM ubuntu:bionic
-MAINTAINER Antoine Millet <antoine.millet@enix.fr>
+FROM python:3.7-alpine
+LABEL maintainer="noc@kollegienet.dk"
 
-RUN apt update && apt install -y python3-pip
-RUN pip3 install pynetbox netaddr
-COPY netbox-prometheus-sd.py /bin/netbox-prometheus-sd
-RUN chmod +x /bin/netbox-prometheus-sd
+COPY . /app
+WORKDIR /app
+
+RUN apk add --update --no-cache g++ libc-dev libxslt-dev
+RUN pip install -r requirements.txt
+COPY netbox-prometheus-sd.py ./netbox-prometheus-sd
+RUN chmod +x ./netbox-prometheus-sd
 RUN mkdir /output
 
-CMD while true; do (/bin/netbox-prometheus-sd "$NETBOX_URL" "$NETBOX_TOKEN" "/output/${OUTPUT_FILE-netbox.json}"; sleep $INTERVAL); done
+CMD while true; do (./netbox-prometheus-sd "$NETBOX_URL" "$NETBOX_TOKEN" "/output/${OUTPUT_FILE-netbox.json}"; sleep $INTERVAL); done

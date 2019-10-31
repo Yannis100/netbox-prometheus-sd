@@ -26,13 +26,17 @@ Netbox admin page (Home -> Extras -> Custom fields) with the following settings:
 # Usage
 
 ```
-usage: netbox-prometheus-sd.py [-h] [-p PORT] [-f CUSTOM_FIELD]
+usage: netbox-prometheus-sd.py [-h] [-p PORT] [-f CUSTOM_FIELD] [-t TENANT]
+                               [-r] [-d] [-v] [-s] [-e EXPORTER]
+                               [-n FIELD_SITE_NAME]
                                url token output
+
+Generate Prometheus config file with devices from Netbox
 
 positional arguments:
   url                   URL to Netbox
   token                 Authentication Token
-  output                Output file
+  output                Output path
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -40,6 +44,23 @@ optional arguments:
                         __port__ label
   -f CUSTOM_FIELD, --custom-field CUSTOM_FIELD
                         Netbox custom field to use to get the target labels
+  -t TENANT, --tenant TENANT
+                        Filter devices based on tenant
+  -r, --device_role     Change snmp_exporter module to device_role slug name
+  -d, --device-type     Change snmp_exporter module to device_type slug name
+  -v, --virtual-chassis
+                        Get only master device of Virtual-Chassis devices
+  -s, --multi-site      Prometheus _target_label_ to specific snmp exporter
+                        per site (multiple output.json with site names)
+  -e EXPORTER, --exporter EXPORTER
+                        IP/FQDN (partial) name of SNMP exporter for Prometheus
+                        _target_label_ (multiple prometheus.yaml jobs with
+                        site names). By default, the site name is added at the
+                        end (if -s selected) but can be positioned with $site;
+                        $region can be used too
+  -n FIELD_SITE_NAME, --field_site_name FIELD_SITE_NAME
+                        IP/FQDN (partial) name of SNMP exporter for Prometheus
+                        _target_label_ (multiple prometheus.yaml jobs with
 ```
 
 The service discovery script requires the URL to the Netbox instance, an
@@ -51,7 +72,7 @@ using the `--custom-field` option. You can also customize the default port on wh
 the target will point to using the `--port` option. Note that this port can be customized
 per target using the `__port__` label set in the custom field.
 
-The output will be generated in the file pointed by the `output` argument.
+The outputs will be generated in the folder pointed by the `output` argument. (`prometheus.yaml` config file with multiple jobs (`-e -s` args) and multiple `output.json` depending on `-r -d -s` arguments)
 
 In the Prometheus configuration, declare a new scrape job using the file_sd_configs
 service discovery:

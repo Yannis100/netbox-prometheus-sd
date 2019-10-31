@@ -1,0 +1,8 @@
+services:
+  - docker
+
+script:
+  - docker build -t kollegienet/netbox-prometheus-sd .
+
+after_script:
+  - docker images
